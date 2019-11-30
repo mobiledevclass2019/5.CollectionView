@@ -1,6 +1,6 @@
 import Foundation
 
 struct FlickrSearchResults {
-  let searchTerm: String
-  var searchResults: [FlickrPhoto]
+    let searchTerm: String
+    var searchResults: [FlickrPhoto]
 }
