@@ -9,9 +9,33 @@
 import UIKit
 
 private let reuseIdentifier = "FlickrCell"
+private let headerIdentifier = "FlickrPhotoHeaderView"
 
 class FlickrPhotosCollectionViewController: UICollectionViewController {
-
+    
+    var searchBar: UITextField
+    
+    override init(collectionViewLayout layout: UICollectionViewLayout) {
+        searchBar = UITextField()
+        super.init(collectionViewLayout: layout)
+        
+        collectionView.backgroundColor = .white
+        
+        searchBar.frame = CGRect(origin: .zero, size: CGSize(width: 400, height: 0))
+        searchBar.placeholder = "Search"
+        searchBar.borderStyle = .line
+        searchBar.returnKeyType = .search
+        searchBar.clearButtonMode = .always
+        navigationItem.titleView = searchBar
+        
+        let rightButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: nil)
+        navigationItem.rightBarButtonItem = rightButton
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -19,7 +43,8 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
         // self.clearsSelectionOnViewWillAppear = false
 
         // Register cell classes
-        self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        self.collectionView!.register(FlickrPhotoCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        self.collectionView.register(FlickrPhotoHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerIdentifier)
 
         // Do any additional setup after loading the view.
     }

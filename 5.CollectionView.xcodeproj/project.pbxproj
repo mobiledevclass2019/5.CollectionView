@@ -17,6 +17,8 @@
 		DBF1A31E2392B9B900EB0FE1 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBF1A31A2392B9B900EB0FE1 /* Result.swift */; };
 		DBF1A31F2392B9B900EB0FE1 /* FlickrPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBF1A31B2392B9B900EB0FE1 /* FlickrPhoto.swift */; };
 		DBF1A3202392B9B900EB0FE1 /* Flickr.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBF1A31C2392B9B900EB0FE1 /* Flickr.swift */; };
+		DBF1A3222392C25300EB0FE1 /* FlickrPhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBF1A3212392C25300EB0FE1 /* FlickrPhotoCell.swift */; };
+		DBF1A3242392C26E00EB0FE1 /* FlickrPhotoHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBF1A3232392C26E00EB0FE1 /* FlickrPhotoHeaderView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +34,8 @@
 		DBF1A31A2392B9B900EB0FE1 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		DBF1A31B2392B9B900EB0FE1 /* FlickrPhoto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlickrPhoto.swift; sourceTree = "<group>"; };
 		DBF1A31C2392B9B900EB0FE1 /* Flickr.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Flickr.swift; sourceTree = "<group>"; };
+		DBF1A3212392C25300EB0FE1 /* FlickrPhotoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlickrPhotoCell.swift; sourceTree = "<group>"; };
+		DBF1A3232392C26E00EB0FE1 /* FlickrPhotoHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlickrPhotoHeaderView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +76,8 @@
 				DBF1A30D2392B3D700EB0FE1 /* LaunchScreen.storyboard */,
 				DBF1A3102392B3D700EB0FE1 /* Info.plist */,
 				DBF1A3162392B82500EB0FE1 /* FlickrPhotosCollectionViewController.swift */,
+				DBF1A3212392C25300EB0FE1 /* FlickrPhotoCell.swift */,
+				DBF1A3232392C26E00EB0FE1 /* FlickrPhotoHeaderView.swift */,
 			);
 			path = 5.CollectionView;
 			sourceTree = "<group>";
@@ -163,6 +169,8 @@
 				DBF1A31E2392B9B900EB0FE1 /* Result.swift in Sources */,
 				DBF1A3052392B3D500EB0FE1 /* SceneDelegate.swift in Sources */,
 				DBF1A3172392B82500EB0FE1 /* FlickrPhotosCollectionViewController.swift in Sources */,
+				DBF1A3242392C26E00EB0FE1 /* FlickrPhotoHeaderView.swift in Sources */,
+				DBF1A3222392C25300EB0FE1 /* FlickrPhotoCell.swift in Sources */,
 				DBF1A3202392B9B900EB0FE1 /* Flickr.swift in Sources */,
 				DBF1A31D2392B9B900EB0FE1 /* FlickrSearchResults.swift in Sources */,
 			);
