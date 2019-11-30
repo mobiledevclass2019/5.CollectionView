@@ -15,6 +15,9 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
     
     var searchBar: UITextField
     
+    private var searches: [FlickrSearchResults] = []
+    private let flickr = Flickr()
+    
     override init(collectionViewLayout layout: UICollectionViewLayout) {
         searchBar = UITextField()
         super.init(collectionViewLayout: layout)
@@ -26,6 +29,7 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
         searchBar.borderStyle = .line
         searchBar.returnKeyType = .search
         searchBar.clearButtonMode = .always
+        searchBar.delegate = self
         navigationItem.titleView = searchBar
         
         let rightButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: nil)
@@ -111,4 +115,41 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
     }
     */
 
+}
+
+// MARK: - Private
+private extension FlickrPhotosCollectionViewController {
+  func photo(for indexPath: IndexPath) -> FlickrPhoto {
+    return searches[indexPath.section].searchResults[indexPath.row]
+  }
+}
+
+extension FlickrPhotosCollectionViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+      // 1
+      let activityIndicator = UIActivityIndicatorView(style: .gray)
+      textField.addSubview(activityIndicator)
+      activityIndicator.frame = textField.bounds
+      activityIndicator.startAnimating()
+      
+      flickr.searchFlickr(for: textField.text!) { searchResults in
+        activityIndicator.removeFromSuperview()
+        
+        switch searchResults {
+        case .error(let error) :
+          // 2
+          print("Error Searching: \(error)")
+        case .results(let results):
+          // 3
+          print("Found \(results.searchResults.count) matching \(results.searchTerm)")
+          self.searches.insert(results, at: 0)
+          // 4
+          self.collectionView?.reloadData()
+        }
+      }
+      
+      textField.text = nil
+      textField.resignFirstResponder()
+      return true
+    }
 }
