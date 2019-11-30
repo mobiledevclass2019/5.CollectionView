@@ -83,6 +83,28 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
         return cell
     }
     
+    override func collectionView(_ collectionView: UICollectionView,
+                                 viewForSupplementaryElementOfKind kind: String,
+                                 at indexPath: IndexPath) -> UICollectionReusableView {
+        switch kind {
+        case UICollectionView.elementKindSectionHeader:
+            guard
+                let headerView = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: headerIdentifier,
+                    for: indexPath) as? FlickrPhotoHeaderView
+                else {
+                    fatalError("Invalid view type")
+            }
+            
+            let searchTerm = searches[indexPath.section].searchTerm
+            headerView.label.text = searchTerm
+            return headerView
+        default:
+            assert(false, "Invalid element type")
+        }
+    }
+    
     // MARK: UICollectionViewDelegate
 }
 
@@ -124,6 +146,10 @@ extension FlickrPhotosCollectionViewController: UITextFieldDelegate {
 }
 
 extension FlickrPhotosCollectionViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: 0, height: 44)
+    }
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let paddingSpace = sectionInsets.left * (itemsPerRow + 1)
         let availableWidth = view.frame.width - paddingSpace
