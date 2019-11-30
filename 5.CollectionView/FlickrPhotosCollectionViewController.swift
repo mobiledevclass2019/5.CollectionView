@@ -88,6 +88,10 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
         searchBar = UITextField()
         super.init(collectionViewLayout: layout)
         
+        collectionView.dragInteractionEnabled = true
+        collectionView.dragDelegate = self
+        collectionView.dropDelegate = self
+        
         collectionView.backgroundColor = .white
         
         searchBar.frame = CGRect(origin: .zero, size: CGSize(width: 400, height: 0))
@@ -261,6 +265,13 @@ private extension FlickrPhotosCollectionViewController {
             self.shareLabel.sizeToFit()
         }
     }
+    func removePhoto(at indexPath: IndexPath) {
+        searches[indexPath.section].searchResults.remove(at: indexPath.row)
+    }
+    
+    func insertPhoto(_ flickrPhoto: FlickrPhoto, at indexPath: IndexPath) {
+        searches[indexPath.section].searchResults.insert(flickrPhoto, at: indexPath.row)
+    }
 }
 
 extension FlickrPhotosCollectionViewController: UITextFieldDelegate {
@@ -320,5 +331,61 @@ extension FlickrPhotosCollectionViewController: UICollectionViewDelegateFlowLayo
                         layout collectionViewLayout: UICollectionViewLayout,
                         minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return sectionInsets.left
+    }
+}
+
+// MARK: - UICollectionViewDragDelegate
+extension FlickrPhotosCollectionViewController: UICollectionViewDragDelegate {
+    func collectionView(_ collectionView: UICollectionView,
+                        itemsForBeginning session: UIDragSession,
+                        at indexPath: IndexPath) -> [UIDragItem] {
+        let flickrPhoto = photo(for: indexPath)
+        guard let thumbnail = flickrPhoto.thumbnail else {
+            return []
+        }
+        let item = NSItemProvider(object: thumbnail)
+        let dragItem = UIDragItem(itemProvider: item)
+        return [dragItem]
+    }
+}
+
+// MARK: - UICollectionViewDropDelegate
+extension FlickrPhotosCollectionViewController: UICollectionViewDropDelegate {
+    func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
+        guard let destinationIndexPath = coordinator.destinationIndexPath else {
+            return
+        }
+        
+        coordinator.items.forEach { dropItem in
+            guard let sourceIndexPath = dropItem.sourceIndexPath else {
+                return
+            }
+            
+            collectionView.performBatchUpdates({
+                let image = photo(for: sourceIndexPath)
+                removePhoto(at: sourceIndexPath)
+                insertPhoto(image, at: destinationIndexPath)
+                collectionView.deleteItems(at: [sourceIndexPath])
+                collectionView.insertItems(at: [destinationIndexPath])
+            }, completion: { _ in
+                coordinator.drop(dropItem.dragItem,
+                                 toItemAt: destinationIndexPath)
+            })
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        canHandle session: UIDropSession) -> Bool {
+        return true
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        dropSessionDidUpdate session: UIDropSession,
+        withDestinationIndexPath destinationIndexPath: IndexPath?)
+        -> UICollectionViewDropProposal {
+            return UICollectionViewDropProposal(
+                operation: .move,
+                intent: .insertAtDestinationIndexPath)
     }
 }
