@@ -18,6 +18,7 @@ class FlickrPhotoCell: UICollectionViewCell {
         self.addSubview(imageView)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
+        imageView.layer.borderColor = tintColor.cgColor
         let leftContraint = NSLayoutConstraint(
             item: self,
             attribute: .left,
@@ -59,5 +60,11 @@ class FlickrPhotoCell: UICollectionViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override var isSelected: Bool {
+        didSet {
+            imageView.layer.borderWidth = isSelected ? 10 : 0
+        }
     }
 }

@@ -17,6 +17,8 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
     
     private var searches: [FlickrSearchResults] = []
     private let flickr = Flickr()
+    private var selectedPhotos: [FlickrPhoto] = []
+    private let shareLabel = UILabel()
     
     private let itemsPerRow: CGFloat = 3
     private let sectionInsets = UIEdgeInsets(
@@ -50,6 +52,38 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
         }
     }
     
+    var sharing: Bool = false {
+        didSet {
+            collectionView.allowsMultipleSelection = sharing
+            
+            collectionView.selectItem(at: nil, animated: true, scrollPosition: [])
+            selectedPhotos.removeAll()
+            
+            guard let shareButton = self.navigationItem.rightBarButtonItems?.first else {
+                return
+            }
+            
+            guard sharing else {
+                navigationItem.setRightBarButton(shareButton, animated: true)
+                return
+            }
+            
+            if largePhotoIndexPath != nil {
+                largePhotoIndexPath = nil
+            }
+            
+            updateSharedPhotoCountLabel()
+            
+            let sharingItem = UIBarButtonItem(customView: shareLabel)
+            let items: [UIBarButtonItem] = [
+                shareButton,
+                sharingItem
+            ]
+            
+            navigationItem.setRightBarButtonItems(items, animated: true)
+        }
+    }
+    
     override init(collectionViewLayout layout: UICollectionViewLayout) {
         searchBar = UITextField()
         super.init(collectionViewLayout: layout)
@@ -64,7 +98,7 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
         searchBar.delegate = self
         navigationItem.titleView = searchBar
         
-        let rightButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: nil)
+        let rightButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(share(sender:)))
         navigationItem.rightBarButtonItem = rightButton
     }
     
@@ -83,6 +117,46 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
         self.collectionView.register(FlickrPhotoHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerIdentifier)
         
         // Do any additional setup after loading the view.
+    }
+    
+    @objc func share(sender: UIBarButtonItem) {
+        guard !searches.isEmpty else {
+            return
+        }
+        
+        guard !selectedPhotos.isEmpty else {
+            sharing.toggle()
+            return
+        }
+        
+        guard sharing else {
+            return
+        }
+        
+        let images: [UIImage] = selectedPhotos.compactMap { photo in
+            if let thumbnail = photo.thumbnail {
+                return thumbnail
+            }
+            
+            return nil
+        }
+        
+        guard !images.isEmpty else {
+            return
+        }
+        
+        let shareController = UIActivityViewController(
+            activityItems: images,
+            applicationActivities: nil)
+        shareController.completionWithItemsHandler = { _, _, _, _ in
+            self.sharing = false
+            self.selectedPhotos.removeAll()
+            self.updateSharedPhotoCountLabel()
+        }
+        
+        shareController.popoverPresentationController?.barButtonItem = sender
+        shareController.popoverPresentationController?.permittedArrowDirections = .any
+        present(shareController, animated: true, completion: nil)
     }
     
     // MARK: UICollectionViewDataSource
@@ -132,6 +206,10 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
     // MARK: UICollectionViewDelegate
     override func collectionView(_ collectionView: UICollectionView,
                                  shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        guard !sharing else {
+            return true
+        }
+        
         if largePhotoIndexPath == indexPath {
             largePhotoIndexPath = nil
         } else {
@@ -140,12 +218,48 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
         
         return false
     }
+    override func collectionView(_ collectionView: UICollectionView,
+                                 didSelectItemAt indexPath: IndexPath) {
+        guard sharing else {
+            return
+        }
+        
+        let flickrPhoto = photo(for: indexPath)
+        selectedPhotos.append(flickrPhoto)
+        updateSharedPhotoCountLabel()
+    }
+    override func collectionView(_ collectionView: UICollectionView,
+                                 didDeselectItemAt indexPath: IndexPath) {
+        guard sharing else {
+            return
+        }
+        
+        let flickrPhoto = photo(for: indexPath)
+        if let index = selectedPhotos.firstIndex(of: flickrPhoto) {
+            selectedPhotos.remove(at: index)
+            updateSharedPhotoCountLabel()
+        }
+    }
+    
 }
 
 // MARK: - Private
 private extension FlickrPhotosCollectionViewController {
     func photo(for indexPath: IndexPath) -> FlickrPhoto {
         return searches[indexPath.section].searchResults[indexPath.row]
+    }
+    func updateSharedPhotoCountLabel() {
+        if sharing {
+            shareLabel.text = "\(selectedPhotos.count) photos selected"
+        } else {
+            shareLabel.text = ""
+        }
+        
+        shareLabel.textColor = view.tintColor
+        
+        UIView.animate(withDuration: 0.3) {
+            self.shareLabel.sizeToFit()
+        }
     }
 }
 
