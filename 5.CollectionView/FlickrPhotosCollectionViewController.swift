@@ -26,6 +26,30 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
         right: 20.0
     )
     
+    var largePhotoIndexPath: IndexPath? {
+        didSet {
+            var indexPaths: [IndexPath] = []
+            if let largePhotoIndexPath = largePhotoIndexPath {
+                indexPaths.append(largePhotoIndexPath)
+            }
+            
+            if let oldValue = oldValue {
+                indexPaths.append(oldValue)
+            }
+            collectionView.performBatchUpdates({
+                self.collectionView.reloadItems(at: indexPaths)
+            }) { _ in
+                if let largePhotoIndexPath = self.largePhotoIndexPath {
+                    self.collectionView.scrollToItem(
+                        at: largePhotoIndexPath,
+                        at: .centeredVertically,
+                        animated: true
+                    )
+                }
+            }
+        }
+    }
+    
     override init(collectionViewLayout layout: UICollectionViewLayout) {
         searchBar = UITextField()
         super.init(collectionViewLayout: layout)
@@ -106,6 +130,16 @@ class FlickrPhotosCollectionViewController: UICollectionViewController {
     }
     
     // MARK: UICollectionViewDelegate
+    override func collectionView(_ collectionView: UICollectionView,
+                                 shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        if largePhotoIndexPath == indexPath {
+            largePhotoIndexPath = nil
+        } else {
+            largePhotoIndexPath = indexPath
+        }
+        
+        return false
+    }
 }
 
 // MARK: - Private
@@ -117,7 +151,6 @@ private extension FlickrPhotosCollectionViewController {
 
 extension FlickrPhotosCollectionViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        // 1
         let activityIndicator = UIActivityIndicatorView(style: .medium)
         textField.addSubview(activityIndicator)
         activityIndicator.frame = textField.bounds
@@ -128,13 +161,10 @@ extension FlickrPhotosCollectionViewController: UITextFieldDelegate {
             
             switch searchResults {
             case .error(let error) :
-                // 2
                 print("Error Searching: \(error)")
             case .results(let results):
-                // 3
                 print("Found \(results.searchResults.count) matching \(results.searchTerm)")
                 self.searches.insert(results, at: 0)
-                // 4
                 self.collectionView?.reloadData()
             }
         }
@@ -151,6 +181,14 @@ extension FlickrPhotosCollectionViewController: UICollectionViewDelegateFlowLayo
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if indexPath == largePhotoIndexPath {
+            let flickrPhoto = photo(for: indexPath)
+            var size = collectionView.bounds.size
+            size.height -= (sectionInsets.top + sectionInsets.bottom)
+            size.width -= (sectionInsets.left + sectionInsets.right)
+            return flickrPhoto.sizeToFillWidth(of: size)
+        }
+        
         let paddingSpace = sectionInsets.left * (itemsPerRow + 1)
         let availableWidth = view.frame.width - paddingSpace
         let widthPerItem = availableWidth / itemsPerRow
